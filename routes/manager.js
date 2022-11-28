@@ -7,8 +7,6 @@ const ddbQueries = require('./query.js');
 
 const ddb = dynamo.getDynamoDbClient();
 
-var loggedin=false;
-
 const restaurantID=""
 //requires view engine. Using ejs
 
@@ -18,9 +16,9 @@ router.get('/', (req, res) =>
     /* This will check if manager is logged in
        If Manager is not logged i, redirect to log in page
        else redirect to manager dashboard*/
-    if(!loggedin)
+    if(!loggedIn)
     {
-        res.redirect('manager/login')
+        res.redirect('login')
     }
     else
     {
@@ -29,60 +27,9 @@ router.get('/', (req, res) =>
 
 });
 
-router.get('/login',(req,res)=>
+router.get('/dashboard',function (req, res)
 {
-    res.render("manager/login");
-})
-
-router.post('/login',async function(req,res)
-{
-    const user_id= req.body.user_id
-    const userT="customer"
-    const password=req.body.password
-    try
-    {
-        const userNameData= await dynamo.getFromTable(ddb,ddbQueries.getUserCredentials(user_id))
-        const userType=await dynamo.getFromTable(ddb,ddbQueries.getUserDetails(user_id))
-        
-            if(password==userNameData.Item[constants.ENCRYPTED_CREDENTIAL])
-            {
-                if(userT==userType.Item[constants.USER_TYPE])
-                {
-                    console.log("User successfully logged in.")
-                    loggedin=true;
-                    res.redirect('/manager') 
-                }
-                else
-                {
-                    console.log('Wrong User Type')
-                    res.redirect('/manager')
-                }
-            }
-            else
-            {
-                console.log('Wrong Password')
-                res.redirect('/manager')
-            }
-    }
     
-    catch(err)
-    {
-        console.log(err)
-        console.log('Wrong User Name or User does not exist.')
-        res.redirect('/manager')
-    }
-}) 
-
-router.get('/logout',  function (req, res)  
-{
-    loggedin = false;
-    res.redirect('/manager');
-    console.log('User Successfully logged Out')
-})
-
-
-router.get('/dashboard',(req,res)=>
-{
     res.render("manager/restaurant-manager-dashboard")
 })
 

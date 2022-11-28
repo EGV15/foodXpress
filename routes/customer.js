@@ -9,9 +9,32 @@ const fs = require('fs');
 const ddb = dynamo.getDynamoDbClient();
 
 /* GET home page. */
-router.get('/', async function(req, res, next) {
-  res.sendFile('users.html', { root: path.join(__dirname, '..', 'views') });
+router.get('/', (req, res) =>
+{
+    /* This will check if manager is logged in
+       If Manager is not logged i, redirect to log in page
+       else redirect to manager dashboard*/
+    if(!loggedIn)
+    {
+        res.redirect('login')
+    }
+    else
+    {
+        res.redirect('customer/dashboard')
+    }
+
 });
+
+router.get('/dashboard',function (req, res)
+{
+  res.render('customer/customer-dashboard', { root: path.join(__dirname, '..', 'views') });
+})
+
+router.get('/profile',function (req, res)
+{
+  res.render('customer/customer-profile', { root: path.join(__dirname, '..', 'views') });
+})
+
 
 router.get('/restaurants', async function(req, res, next) {
   const restaurants = await dynamo.queryTable(ddb, ddbQueries.queryListOfRestaurants());
